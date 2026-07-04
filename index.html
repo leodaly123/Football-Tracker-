@@ -35,7 +35,7 @@
     --radius:16px;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  html{-webkit-text-size-adjust:100%}
+  html{-webkit-text-size-adjust:100%;color-scheme:dark}
   body{
     background:var(--bg);
     color:var(--text);
@@ -134,6 +134,21 @@
   input:focus,select:focus,textarea:focus{border-color:rgba(74,222,128,.45)}
   input[type=number]{-moz-appearance:textfield}
   input::-webkit-outer-spin-button,input::-webkit-inner-spin-button{-webkit-appearance:none}
+  /* iOS Safari: stop native styling of date/time fields (white box, odd height/centering) */
+  input,select{min-height:45px}
+  input[type=checkbox]{min-height:0}
+  input[type=date],input[type=time]{
+    -webkit-appearance:none;appearance:none;
+    display:flex;align-items:center;
+    background:var(--surface2);color:var(--text);
+  }
+  input::-webkit-date-and-time-value{text-align:left}
+  select{
+    -webkit-appearance:none;appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238fa0b5' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;background-position:right 12px center;
+    padding-right:32px;
+  }
   label.fld{display:block;font-size:12px;font-weight:650;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
   .frow{display:flex;gap:10px}
   .frow>*{flex:1}
@@ -221,7 +236,14 @@
   .injflag{position:absolute;bottom:14px;right:14px;font-size:14px}
 
   /* ---------- league table ---------- */
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
   table.league{width:100%;border-collapse:collapse;font-size:14px}
+  @media(max-width:480px){
+    table.league{font-size:13px}
+    table.league td{padding:8px 4px}
+    table.league th{padding:8px 4px}
+    table.league td.tname{max-width:110px}
+  }
   table.league th{
     font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);
     font-weight:700;text-align:center;padding:8px 6px;border-bottom:1px solid var(--border);
@@ -305,7 +327,16 @@
     font-family:inherit;
   }
   .stepper .sval{width:20px;text-align:center;font-weight:800;font-size:14px}
-  .prow select.prating{width:58px;padding:5px 6px;font-size:16px;flex:none}
+  .prow select.prating{width:58px;min-height:34px;padding:5px 22px 5px 8px;font-size:16px;flex:none;background-position:right 6px center}
+  @media(max-width:480px){
+    .prow{gap:5px;padding:8px 8px}
+    .prow .pchk{gap:6px}
+    .prow .pchk span{font-size:13px}
+    .stepper .slabel{width:10px;font-size:9px}
+    .stepper button{width:22px;height:22px;font-size:13px}
+    .stepper .sval{width:16px;font-size:13px}
+    .prow select.prating{width:46px;min-height:30px;padding:4px 16px 4px 5px;font-size:13px;background-position:right 3px center}
+  }
 
   /* player profile */
   .prof-head{display:flex;gap:14px;align-items:center;margin-bottom:16px}
@@ -344,7 +375,7 @@
 <input type="file" id="importFile" accept=".json,application/json" style="display:none">
 <script>
 /* ================= data ================= */
-const APP_VERSION = '1.2';
+const APP_VERSION = '1.3';
 const LS_KEY = 'footballTrackerV4';
 const POSITIONS = ['GK','DEF','MID','FWD'];
 const SEED_PLAYERS = [
@@ -529,7 +560,7 @@ function renderApp(){
           </div>
         </div>
         ${db.teams.length>1 ? `
-        <select style="width:auto;padding:7px 10px;font-size:13px" onchange="switchTeam(this.value)">
+        <select style="width:auto;min-height:34px;padding:7px 28px 7px 10px;font-size:13px" onchange="switchTeam(this.value)">
           ${db.teams.map(x=>`<option value="${x.id}" ${x.id===db.activeTeamId?'selected':''}>${esc(x.name)}</option>`).join('')}
         </select>` : ''}
       </div>
@@ -1173,6 +1204,7 @@ function viewLeague(){
     </div>
     ${hasOpps || teamStats('League').p ? `
     <div class="card" style="padding:10px 14px">
+      <div class="table-scroll">
       <table class="league">
         <thead><tr><th>#</th><th>Team</th><th>P</th><th>W</th><th>D</th><th>L</th><th>GF</th><th>GA</th><th>GD</th><th>Pts</th></tr></thead>
         <tbody>
@@ -1186,6 +1218,7 @@ function viewLeague(){
           </tr>`).join('')}
         </tbody>
       </table>
+      </div>
     </div>` : `
     <div class="empty"><div class="big">🏆</div>
       <p>Add the other teams in your league, then their records. Your own row fills in automatically as you log league matches.</p>
