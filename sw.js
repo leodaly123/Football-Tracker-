@@ -1,4 +1,4 @@
-const CACHE = 'football-tracker-v1.3';
+const CACHE = 'football-tracker-v1.4';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-180.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -13,11 +13,12 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
-// Network-first so updates arrive when online; cached copy keeps the app working offline.
+// Network-first (bypassing the HTTP cache, so GitHub Pages' 10-minute cache can't serve
+// stale files); cached copy keeps the app working offline.
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
   e.respondWith(
-    fetch(e.request).then(res => {
+    fetch(e.request, { cache: 'no-store' }).then(res => {
       const clone = res.clone();
       caches.open(CACHE).then(c => c.put(e.request, clone));
       return res;

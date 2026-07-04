@@ -375,7 +375,7 @@
 <input type="file" id="importFile" accept=".json,application/json" style="display:none">
 <script>
 /* ================= data ================= */
-const APP_VERSION = '1.3';
+const APP_VERSION = '1.4';
 const LS_KEY = 'footballTrackerV4';
 const POSITIONS = ['GK','DEF','MID','FWD'];
 const SEED_PLAYERS = [
@@ -1557,7 +1557,18 @@ function resetAll(){
 window.FT={ get db(){return db}, set db(v){db=v}, save, renderApp };
 
 /* offline support (works when installed to the iPhone home screen over https) */
-if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    reg.update();                                   // check for a new version on every launch
+    setInterval(()=>reg.update(), 60*60*1000);      // and hourly while open
+  }).catch(()=>{});
+  // when a new version takes over, reload once so it shows immediately
+  let swReloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{
+    if(swReloaded) return; swReloaded=true;
+    location.reload();
+  });
+}
 
 renderApp();
 </script>
